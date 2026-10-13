@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vụ Án Kiến Thức: Bí Ẩn Bảng Tuần Hoàn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --fuchsia: #d946ef;
+            --fuchsia-dark: #a21caf;
+            --gold: #fbbf24;
+            --pastel-pink: #fdf2f8;
+            --pastel-cream: #fffbeb;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--pastel-pink) 0%, var(--pastel-cream) 100%);
+            color: #4c1d95;
+            min-height: 100vh;
+            overflow-x: hidden;
+            touch-action: manipulation;
+        }
+        .font-cursive { font-family: 'Pacifico', cursive; }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(251, 191, 36, 0.3);
+            box-shadow: 0 10px 25px rgba(217, 70, 239, 0.15);
+            border-radius: 24px;
+        }
+        .btn-3d {
+            transition: all 0.2s ease;
+            box-shadow: 0 6px 0 var(--fuchsia-dark), 0 10px 10px rgba(0,0,0,0.1);
+        }
+        .btn-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 var(--fuchsia-dark), 0 4px 4px rgba(0,0,0,0.1);
+        }
+        .btn-gold-3d {
+            box-shadow: 0 6px 0 #b45309, 0 10px 10px rgba(0,0,0,0.1);
+        }
+        .btn-gold-3d:active {
+            transform: translateY(6px);
+            box-shadow: 0 0px 0 #b45309, 0 4px 4px rgba(0,0,0,0.1);
+        }
+        .sparkle-text {
+            background: linear-gradient(to right, #d946ef, #fbbf24, #d946ef);
+            background-size: 200% auto;
+            color: transparent;
+            -webkit-background-clip: text;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+        }
+        @keyframes shine { to { background-position: 200% center; } }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .floating-element { animation: float 4s ease-in-out infinite; }
+        .shake { animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        .bounce-in { animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes bounceIn {
+            0% { transform: scale(0.1); opacity: 0; }
+            60% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Cấu trúc Layout */
+        #app-container { display: flex; flex-direction: column; min-height: 100vh; padding: 1rem; }
+        #header-bar { display: none; } /* Sẽ hiện khi vào game */
+        #main-content { flex: 1; display: flex; align-items: center; justify-content: center; width: 100%; max-w: 48rem; margin: 0 auto; }
+        .hidden-screen { display: none !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--pastel-pink); }
+        ::-webkit-scrollbar-thumb { background: var(--fuchsia); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
+        <div class="absolute top-10 left-10 text-5xl floating-element opacity-60">🌸</div>
+        <div class="absolute bottom-20 right-10 text-5xl floating-element opacity-60" style="animation-delay: 1s;">💖</div>
+        <div class="absolute top-40 right-20 text-4xl floating-element opacity-60" style="animation-delay: 2s;">🌷</div>
+        <div class="absolute bottom-40 left-20 text-4xl floating-element opacity-60" style="animation-delay: 1.5s;">✨</div>
+        <div class="absolute top-1/2 left-1/4 text-6xl floating-element opacity-30">🎀</div>
+    </div>
+
+    <div id="app-container" class="max-w-5xl mx-auto">
+        <header id="header-bar" class="glass-panel w-full p-4 mb-4 flex flex-wrap justify-between items-center gap-4 z-10 sticky top-2">
+            <div class="flex items-center gap-2">
+                <span class="text-3xl">🕵️‍♀️</span>
+                <div>
+                    <h1 class="font-bold text-fuchsia-700 leading-tight">THÁM TỬ KIẾN THỨC</h1>
+                    <div class="text-xs font-semibold text-gray-500">Môn Hóa Học - Lớp 10</div>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap gap-4 items-center bg-white/50 p-2 rounded-xl border border-pink-200">
+                <div class="text-center px-2 border-r border-pink-300">
+                    <div class="text-xs uppercase text-gray-500 font-bold">Điểm</div>
+                    <div class="font-black text-xl text-fuchsia-600" id="score-display">0</div>
+                </div>
+                <div class="text-center px-2 border-r border-pink-300">
+                    <div class="text-xs uppercase text-gray-500 font-bold">Manh mối</div>
+                    <div class="font-black text-xl text-yellow-600" id="clue-display">0/5</div>
+                </div>
+                <div class="text-center px-2">
+                    <div class="text-xs uppercase text-gray-500 font-bold">Thời gian</div>
+                    <div class="font-black text-xl text-blue-600" id="timer-display">00:00</div>
+                </div>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="toggleSound()" class="p-2 bg-pink-100 text-fuchsia-600 rounded-full hover:bg-pink-200 transition" title="Bật/Tắt Âm thanh">
+                    <svg id="sound-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10.5a1.5 1.5 0 00-1.5 1.5v4a1.5 1.5 0 001.5 1.5h3.25l4.634 3.707A1 1 0 0014 20.354V3.646a1 1 0 00-1.616-.793L8.25 6.5H5z"></path></svg>
+                </button>
+                <button onclick="toggleFullScreen()" class="p-2 bg-pink-100 text-fuchsia-600 rounded-full hover:bg-pink-200 transition" title="Toàn màn hình">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                </button>
+                <button onclick="goHome()" class="p-2 bg-pink-100 text-fuchsia-600 rounded-full hover:bg-pink-200 transition" title="Trang chủ">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                </button>
+            </div>
+            
+            <!-- Student Info Display Header -->
+            <div class="w-full mt-2 bg-fuchsia-50 p-2 rounded-lg border border-fuchsia-200 flex justify-center items-center gap-6 text-sm font-bold text-fuchsia-800">
+                <span>🕵️ Thám tử: <span id="header-student-name" class="text-fuchsia-600 uppercase">...</span></span>
+                <span>🏫 Lớp: <span id="header-student-class" class="text-blue-600 uppercase">...</span></span>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-3 overflow-hidden border border-pink-200">
+                <div id="progress-bar" class="bg-gradient-to-r from-fuchsia-400 to-fuchsia-600 h-3 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+            </div>
+        </header>
+
+        <main id="main-content" class="w-full pb-10">
+            <div id="screen-home" class="glass-panel w-full max-w-2xl p-8 text-center flex flex-col items-center gap-6 bounce-in">
+                <div class="text-7xl floating-element mb-2">🕵️‍♀️🌸📖</div>
+                <h1 class="text-4xl md:text-5xl font-black text-fuchsia-700 mb-2 leading-tight">
+                    VỤ ÁN KIẾN THỨC <br>
+                    <span class="sparkle-text font-cursive text-5xl">Bí Ẩn Bảng Tuần Hoàn</span>
+                </h1>
+                <p class="text-lg font-medium text-gray-700 bg-white/60 p-4 rounded-xl border border-pink-200">
+                    Một tên trộm bí ẩn đã đánh cắp các quy luật quan trọng trong sách Hóa học lớp 10! Bạn hãy hóa thân thành Thám tử, phá giải 5 hồ sơ để khôi phục kiến thức nhé.
+                </p>
+
+                <!-- Input Thông tin học sinh -->
+                <div class="w-full max-w-md mx-auto space-y-3 mt-2 bg-white/80 p-4 rounded-2xl border-2 border-fuchsia-200 shadow-sm">
+                    <h3 class="font-bold text-fuchsia-800 text-sm uppercase">Thông tin Thám tử</h3>
+                    <input type="text" id="home-input-name" placeholder="Nhập Họ và tên..." class="w-full p-3 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-fuchsia-500 font-bold text-gray-700">
+                    <input type="text" id="home-input-class" placeholder="Nhập Lớp (VD: 10T2)..." class="w-full p-3 rounded-xl border-2 border-pink-200 focus:outline-none focus:border-fuchsia-500 font-bold text-gray-700">
+                    <div id="home-error-msg" class="text-red-500 font-bold text-sm hidden">⚠️ Vui lòng nhập đầy đủ Họ tên và Lớp!</div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-4 mt-2 w-full justify-center">
+                    <button onclick="startGame()" class="btn-3d bg-fuchsia-500 text-white font-bold text-xl py-4 px-10 rounded-2xl w-full sm:w-auto">
+                        BẮT ĐẦU ĐIỀU TRA
+                    </button>
+                    <button onclick="showInstructions()" class="btn-gold-3d bg-yellow-400 text-yellow-900 font-bold text-xl py-4 px-10 rounded-2xl w-full sm:w-auto">
+                        HƯỚNG DẪN
+                    </button>
+                </div>
+            </div>
+
+            <div id="screen-instructions" class="glass-panel w-full max-w-2xl p-8 hidden-screen">
+                <h2 class="text-3xl font-black text-fuchsia-700 mb-6 flex items-center gap-2">
+                    <span>📜</span> HƯỚNG DẪN ĐIỀU TRA
+                </h2>
+                <div class="space-y-4 text-gray-700 font-medium bg-white/70 p-6 rounded-xl text-lg">
+                    <p>🎀 <strong>Nhiệm vụ:</strong> Mở khóa 5 hồ sơ bằng cách trả lời đúng các câu hỏi dựa trên kiến thức SGK.</p>
+                    <p>💖 <strong>Điểm số:</strong> Trả lời đúng nhận <span class="text-green-600 font-bold">10 điểm</span> và mở 1 manh mối.</p>
+                    <p>🌷 <strong>Gợi ý:</strong> Trả lời sai <span class="text-red-500 font-bold">không bị trừ điểm</span>. Bạn sẽ nhận được gợi ý bám sát tài liệu để thử lại.</p>
+                    <p>✨ <strong>Kết luận:</strong> Thu thập đủ 5 manh mối để vào Phòng Kết Luận, tìm ra kiến thức bị đánh cắp!</p>
+                </div>
+                <div class="mt-8 flex justify-center">
+                    <button onclick="hideInstructions()" class="btn-3d bg-fuchsia-500 text-white font-bold py-3 px-8 rounded-xl">
+                        ĐÃ HIỂU, QUAY LẠI
+                    </button>
+                </div>
+            </div>
+
+            <div id="screen-files" class="glass-panel w-full max-w-4xl p-6 hidden-screen">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-black text-fuchsia-700 flex items-center gap-2">
+                        <span>📁</span> HỒ SƠ VỤ ÁN
+                    </h2>
+                    <button onclick="openEvidenceBoard()" class="btn-gold-3d bg-yellow-400 text-yellow-900 font-bold py-2 px-4 rounded-xl flex items-center gap-2">
+                        <span>📌</span> BẢNG CHỨNG CỨ
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="files-grid">
+                    <!-- Sẽ được render bằng JS -->
+                </div>
+
+                <div class="mt-8 flex justify-center hidden" id="btn-to-conclusion">
+                    <button onclick="enterConclusionRoom()" class="btn-3d bg-green-500 text-white font-bold text-xl py-4 px-10 rounded-2xl animate-pulse">
+                        🔓 VÀO PHÒNG KẾT LUẬN
+                    </button>
+                </div>
+            </div>
+
+            <div id="screen-question" class="glass-panel w-full max-w-2xl p-6 hidden-screen relative">
+                <div class="absolute -top-4 -right-4 bg-yellow-400 text-yellow-900 font-black px-4 py-2 rounded-full border-4 border-white shadow-lg rotate-12" id="q-number-badge">
+                    Thử thách 1
+                </div>
+                <h3 class="text-xl font-bold text-gray-500 mb-2 uppercase tracking-wide" id="q-file-title">Hồ sơ 1</h3>
+                
+                <div class="bg-white rounded-2xl p-6 shadow-inner border-2 border-pink-100 mb-6">
+                    <p class="text-2xl font-bold text-fuchsia-900 leading-snug" id="q-text">
+                        Nội dung câu hỏi...
+                    </p>
+                </div>
+
+                <div class="space-y-3" id="q-options">
+                    <!-- Tùy chọn render bằng JS -->
+                </div>
+
+                <!-- Phản hồi (Đúng/Sai) -->
+                <div id="q-feedback" class="hidden mt-6 p-4 rounded-xl text-center font-bold text-lg border-2">
+                    <!-- Nội dung phản hồi -->
+                </div>
+                
+                <!-- Gợi ý -->
+                <div id="q-hint" class="hidden mt-4 bg-yellow-50 p-4 rounded-xl border border-yellow-200 text-yellow-800 text-sm font-medium">
+                    <span class="font-bold">💡 Gợi ý từ SGK:</span> <span id="hint-text">...</span>
+                </div>
+
+                <div class="mt-6 flex justify-between gap-4 hidden" id="q-actions">
+                    <button onclick="retryQuestion()" id="btn-retry" class="btn-gold-3d bg-yellow-400 text-yellow-900 font-bold py-3 px-6 rounded-xl flex-1 hidden">
+                        🔄 THỬ LẠI
+                    </button>
+                    <button onclick="nextQuestion()" id="btn-next" class="btn-3d bg-fuchsia-500 text-white font-bold py-3 px-6 rounded-xl flex-1 hidden">
+                        TIẾP THEO ➡️
+                    </button>
+                </div>
+            </div>
+
+            <!-- Màn hình thông báo nhận manh mối mới -->
+            <div id="screen-clue-unlocked" class="glass-panel w-full max-w-2xl p-8 hidden-screen text-center">
+                <!-- Nội dung được render bằng JS -->
+            </div>
+
+            <div id="modal-evidence" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden-screen">
+                <div class="glass-panel w-[90%] max-w-3xl p-6 bg-white/95 max-h-[90vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-3xl font-black text-fuchsia-700 flex items-center gap-2">
+                            <span>📌</span> BẢNG CHỨNG CỨ
+                        </h2>
+                        <button onclick="closeEvidenceBoard()" class="text-gray-500 hover:text-red-500 text-3xl font-black">&times;</button>
+                    </div>
+                    <div class="grid gap-4" id="evidence-list">
+                        <!-- Danh sách manh mối -->
+                    </div>
+                    <div class="mt-6 text-center text-sm text-gray-500 font-medium">
+                        Trả lời đúng toàn bộ câu hỏi trong 1 Hồ sơ để mở khóa Manh mối tương ứng.
+                    </div>
+                </div>
+            </div>
+
+            <div id="screen-conclusion" class="glass-panel w-full max-w-3xl p-8 hidden-screen text-center">
+                <h2 class="text-4xl font-black text-fuchsia-700 mb-6 uppercase">Phòng Kết Luận</h2>
+                <div class="bg-white/80 p-6 rounded-xl border-2 border-yellow-300 mb-6 text-left">
+                    <p class="font-bold text-gray-700 mb-4 text-lg">Dựa vào 5 manh mối đã thu thập:</p>
+                    <ul class="list-disc pl-6 space-y-2 text-fuchsia-900 font-medium bg-pink-50 p-4 rounded-lg" id="final-clues-list">
+                        <!-- Clues injected here -->
+                    </ul>
+                    <p class="font-bold text-gray-800 mt-6 text-xl text-center">Bạn hãy xác định: KIẾN THỨC BỊ ĐÁNH CẮP LÀ GÌ?</p>
+                </div>
+                
+                <div class="grid gap-4" id="final-options">
+                    <button onclick="checkFinalAnswer(false, this)" class="w-full text-left p-4 rounded-xl border-2 border-pink-200 hover:bg-pink-100 font-bold text-lg text-gray-700 transition bg-white">A. Cấu tạo chi tiết của Hạt nhân nguyên tử</button>
+                    <button onclick="checkFinalAnswer(true, this)" class="w-full text-left p-4 rounded-xl border-2 border-pink-200 hover:bg-pink-100 font-bold text-lg text-gray-700 transition bg-white">B. Xu hướng biến đổi tính chất của các nguyên tố trong bảng tuần hoàn</button>
+                    <button onclick="checkFinalAnswer(false, this)" class="w-full text-left p-4 rounded-xl border-2 border-pink-200 hover:bg-pink-100 font-bold text-lg text-gray-700 transition bg-white">C. Lịch sử phát minh ra Bảng tuần hoàn</button>
+                </div>
+
+                <div id="final-feedback" class="hidden mt-6"></div>
+            </div>
+
+            <div id="screen-summary" class="glass-panel w-full max-w-4xl p-8 hidden-screen relative overflow-hidden">
+                <div class="absolute -top-10 -left-10 text-8xl opacity-20">📖</div>
+                <div class="absolute -bottom-10 -right-10 text-8xl opacity-20">✨</div>
+                
+                <h2 class="text-4xl font-black text-fuchsia-700 mb-2 text-center sparkle-text relative z-10">VỤ ÁN ĐÃ ĐƯỢC PHÁ!</h2>
+                <p class="text-center text-gray-600 font-bold mb-6">Thám tử đã khôi phục thành công các kiến thức sau:</p>
+                
+                <div class="bg-white/90 p-6 rounded-2xl border-l-4 border-fuchsia-500 shadow-md relative z-10 mb-8">
+                    <h3 class="font-bold text-xl text-fuchsia-800 mb-4 uppercase flex items-center gap-2"><span>📚</span> TỔNG KẾT BÀI HỌC (EM ĐÃ HỌC)</h3>
+                    <p class="font-bold text-gray-800 mb-2">Theo chiều tăng dần của điện tích hạt nhân nguyên tử:</p>
+                    <ul class="space-y-3 text-gray-700 font-medium">
+                        <li class="flex gap-2 items-start"><span class="text-fuchsia-500">▶</span> <strong>Trong một chu kì:</strong> Bán kính nguyên tử giảm dần, độ âm điện tăng dần.</li>
+                        <li class="flex gap-2 items-start"><span class="text-fuchsia-500">▶</span> <strong>Trong một chu kì:</strong> Tính kim loại giảm dần và tính phi kim tăng dần.</li>
+                        <li class="flex gap-2 items-start"><span class="text-fuchsia-500">▶</span> Số electron hoá trị của nguyên tử các nguyên tố nhóm A tăng lần lượt từ 1 đến 8.</li>
+                        <li class="flex gap-2 items-start"><span class="text-fuchsia-500">▶</span> <strong>Trong một nhóm A:</strong> Bán kính nguyên tử tăng dần, độ âm điện giảm dần.</li>
+                        <li class="flex gap-2 items-start"><span class="text-fuchsia-500">▶</span> <strong>Trong một nhóm A:</strong> Tính kim loại tăng dần và tính phi kim giảm dần.</li>
+                    </ul>
+                </div>
+
+                <!-- Form lưu điểm -->
+                <div class="bg-white/90 p-6 rounded-2xl border-l-4 border-blue-500 shadow-md relative z-10 mb-8 bounce-in" style="animation-delay: 0.3s;">
+                    <h3 class="font-bold text-xl text-blue-800 mb-4 uppercase flex items-center gap-2"><span>💾</span> LƯU KẾT QUẢ HỌC TẬP</h3>
+                    <div class="flex flex-col md:flex-row gap-4 mb-4">
+                        <input type="text" id="student-name" placeholder="Nhập Họ và Tên của bạn..." class="flex-1 p-3 rounded-xl border-2 border-blue-200 focus:outline-none focus:border-blue-500">
+                        <input type="text" id="student-class" placeholder="Nhập Lớp (VD: 10T2)..." class="w-full md:w-1/3 p-3 rounded-xl border-2 border-blue-200 focus:outline-none focus:border-blue-500">
+                    </div>
+                    <button id="btn-submit-score" onclick="submitResults()" class="btn-3d bg-blue-500 text-white font-bold text-lg py-3 px-8 rounded-xl w-full">
+                        🚀 GỬI KẾT QUẢ LÊN HỆ THỐNG
+                    </button>
+                    <div id="submit-message" class="hidden mt-4 font-bold text-center"></div>
+                </div>
+
+                <!-- Lời chúc yêu thương -->
+                <div class="bg-gradient-to-r from-pink-100 via-pink-50 to-pink-100 p-6 rounded-2xl border border-pink-300 text-center relative z-10 bounce-in" style="animation-delay: 0.5s;">
+                    <div class="text-4xl mb-3">🌸💖🌷</div>
+                    <p class="font-cursive text-2xl md:text-3xl text-fuchsia-600 leading-relaxed drop-shadow-sm">
+                        Nhân dịp này, xin gửi lời chúc yêu thương nhất:<br>
+                        "Chúc mẹ, bà, cô giáo và tất cả phụ nữ Việt Nam luôn mạnh khỏe, hạnh phúc, được yêu thương và luôn rạng rỡ mỗi ngày!"
+                    </p>
+                    <div class="text-4xl mt-3">✨🎀✨</div>
+                </div>
+
+                <div class="mt-8 flex flex-wrap justify-center gap-4 relative z-10">
+                    <button onclick="resetGame()" class="btn-3d bg-fuchsia-500 text-white font-bold text-xl py-3 px-8 rounded-xl">
+                        🔄 CHƠI LẠI TỪ ĐẦU
+                    </button>
+                    <button onclick="goHome()" class="btn-gold-3d bg-yellow-400 text-yellow-900 font-bold text-xl py-3 px-8 rounded-xl">
+                        🏠 TRANG CHỦ
+                    </button>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // --- DATA (Trích xuất 100% từ SGK Hóa 10 tải lên) ---
+        const gameData = [
+            {
+                id: 1,
+                title: "Hồ sơ 1: Bí ẩn Bán kính Nguyên tử",
+                icon: "📏",
+                clue: "Trong chu kì, bán kính nguyên tử GIẢM do lực hút tăng. Trong nhóm A, bán kính TĂNG do số lớp electron tăng.",
+                questions: [
+                    {
+                        q: "Dựa vào SGK, xu hướng biến đổi bán kính nguyên tử trong một chu kì theo chiều tăng dần của điện tích hạt nhân là gì?",
+                        options: ["Tăng dần", "Giảm dần", "Không thay đổi"],
+                        answer: 1,
+                        hint: "Trang 35 SGK: 'Trong một chu kì, bán kính nguyên tử giảm theo chiều tăng dần của điện tích hạt nhân'."
+                    },
+                    {
+                        q: "Nguyên nhân làm bán kính nguyên tử GIẢM trong một chu kì là do đâu?",
+                        options: ["Số lớp electron tăng", "Lực đẩy giữa các electron tăng", "Lực hút giữa hạt nhân với các electron lớp ngoài cùng tăng"],
+                        answer: 2,
+                        hint: "Trang 35 SGK: 'Bán kính giảm là do lực hút tăng và ngược lại'."
+                    }
+                ]
+            },
+            {
+                id: 2,
+                title: "Hồ sơ 2: Vụ trộm Năng lượng Ion hóa",
+                icon: "⚡",
+                clue: "Năng lượng ion hóa thứ nhất có xu hướng TĂNG trong một chu kì và GIẢM trong một nhóm A.",
+                questions: [
+                    {
+                        q: "Năng lượng ion hóa thứ nhất là năng lượng tối thiểu cần thiết để làm gì?",
+                        options: ["Tách electron thứ nhất ra khỏi nguyên tử ở thể khí, trạng thái cơ bản", "Thêm một electron vào nguyên tử", "Tạo thành liên kết hóa học"],
+                        answer: 0,
+                        hint: "Trang 36 SGK (phần chữ đậm): '...tách electron thứ nhất ra khỏi nguyên tử ở thể khí, ở trạng thái cơ bản'."
+                    },
+                    {
+                        q: "Trong một nhóm A, năng lượng ion hóa thứ nhất có xu hướng thay đổi như thế nào theo chiều tăng của điện tích hạt nhân?",
+                        options: ["Tăng dần", "Giảm dần", "Biến đổi không có quy luật"],
+                        answer: 1,
+                        hint: "Trang 36 SGK: 'Trong một nhóm A, năng lượng ion hoá thứ nhất có xu hướng giảm theo chiều tăng dần của điện tích hạt nhân'."
+                    }
+                ]
+            },
+            {
+                id: 3,
+                title: "Hồ sơ 3: Bóng ma Độ âm điện",
+                icon: "🧲",
+                clue: "Độ âm điện (đại lượng đặc trưng cho khả năng hút electron) TĂNG trong chu kì và GIẢM trong nhóm A.",
+                questions: [
+                    {
+                        q: "Khái niệm Độ âm điện (χ) của một nguyên tử là gì?",
+                        options: ["Đại lượng đặc trưng cho khả năng nhường electron", "Đại lượng đặc trưng cho khả năng hút electron của nguyên tử khi tạo thành liên kết hóa học", "Năng lượng tỏa ra khi nhận electron"],
+                        answer: 1,
+                        hint: "Trang 36 SGK (Phần III): 'Độ âm điện... là đại lượng đặc trưng cho khả năng hút electron của nguyên tử...'"
+                    },
+                    {
+                        q: "Dựa vào Bảng 6.2 (giá trị độ âm điện theo Pauling), nguyên tố nào có độ âm điện lớn nhất?",
+                        options: ["Lithium (Li)", "Oxygen (O)", "Fluorine (F)"],
+                        answer: 2,
+                        hint: "Quan sát Bảng 6.2 trang 37 SGK, ô F (Nhóm VIIA, Chu kì 2) có giá trị 3,98 là lớn nhất."
+                    }
+                ]
+            },
+            {
+                id: 4,
+                title: "Hồ sơ 4: Cán cân Kim loại - Phi kim",
+                icon: "⚖️",
+                clue: "Tính kim loại (nhường e) GIẢM trong chu kì, TĂNG trong nhóm. Tính phi kim (nhận e) ngược lại.",
+                questions: [
+                    {
+                        q: "Hoàn thành nhận định sau: 'Nguyên tử của nguyên tố nào càng dễ nhường electron để trở thành ion dương, tính kim loại của nguyên tố đó...'?",
+                        options: ["càng yếu", "càng mạnh", "không thay đổi"],
+                        answer: 1,
+                        hint: "Trang 38 SGK (Phần IV.1 Khái niệm): '...tính kim loại của nguyên tố đó càng mạnh'."
+                    },
+                    {
+                        q: "Theo chiều tăng dần của điện tích hạt nhân, tính kim loại và tính phi kim biến đổi thế nào trong MỘT NHÓM A?",
+                        options: ["Tính kim loại tăng dần, tính phi kim giảm dần", "Tính kim loại giảm dần, tính phi kim tăng dần", "Cả hai đều tăng"],
+                        answer: 0,
+                        hint: "Trang 39 SGK (đoạn giữa): 'Trong một nhóm A... tính kim loại tăng dần và tính phi kim giảm dần'."
+                    }
+                ]
+            },
+            {
+                id: 5,
+                title: "Hồ sơ 5: Bức màn Cấu hình Electron",
+                icon: "⚛️",
+                clue: "Sự giống nhau về số electron hoá trị dẫn đến sự tương tự nhau về tính chất hóa học của các nguyên tố trong cùng nhóm A.",
+                questions: [
+                    {
+                        q: "Các nguyên tử của các nguyên tố cùng một nhóm A (trừ He) có đặc điểm chung gì về electron?",
+                        options: ["Có cùng số lớp electron", "Có cùng số nơtron", "Có số electron lớp ngoài cùng (electron hoá trị) bằng nhau"],
+                        answer: 2,
+                        hint: "Trang 34 SGK: 'Nguyên tử của các nguyên tố cùng một nhóm A có số electron lớp ngoài cùng... bằng nhau'."
+                    },
+                    {
+                        q: "Nguyên nhân sâu xa của sự biến đổi tuần hoàn về tính chất của các nguyên tố (Bán kính, Độ âm điện,...) là do đâu?",
+                        options: ["Sự biến đổi tuần hoàn cấu hình electron lớp ngoài cùng", "Sự thay đổi khối lượng nguyên tử", "Sự thay đổi trạng thái tồn tại"],
+                        answer: 0,
+                        hint: "Trang 34 SGK (cuối trang): 'Sự biến đổi tuần hoàn cấu hình electron lớp ngoài cùng... là nguyên nhân của sự biến đổi tuần hoàn về tính chất...'"
+                    }
+                ]
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let state = {
+            studentName: "",
+            studentClass: "",
+            score: 0,
+            timer: 0,
+            timerInterval: null,
+            unlockedClues: [],
+            fileStatus: [false, false, false, false, false], // true if completed
+            currentFileIndex: -1,
+            currentQuestionIndex: 0,
+            retryCount: 0,
+            isSoundOn: true
+        };
+
+        // --- AUDIO ENGINE (Simple Web Audio API) ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(frequency, type, duration) {
+            if (!state.isSoundOn) return;
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.type = type;
+            oscillator.frequency.value = frequency;
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+        function soundCorrect() { playTone(600, 'sine', 0.1); setTimeout(() => playTone(800, 'sine', 0.2), 100); }
+        function soundWrong() { playTone(200, 'sawtooth', 0.3); }
+        function soundClick() { playTone(400, 'sine', 0.05); }
+        function soundWin() { 
+            [523, 659, 783, 1046].forEach((freq, i) => setTimeout(() => playTone(freq, 'sine', 0.2), i*150)); 
+        }
+
+        // --- UI FUNCTIONS ---
+        function formatTime(seconds) {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            return `${m}:${s}`;
+        }
+
+        function updateHeader() {
+            document.getElementById('score-display').innerText = state.score;
+            document.getElementById('clue-display').innerText = `${state.unlockedClues.length}/5`;
+            
+            // Progress Bar
+            let totalQuestions = gameData.reduce((sum, file) => sum + file.questions.length, 0);
+            let answered = state.fileStatus.filter(s=>s).length * 2; // Approximation for simplicity in UI, better logic below
+            let progress = (state.unlockedClues.length / 5) * 100;
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+        }
+
+        function toggleSound() {
+            state.isSoundOn = !state.isSoundOn;
+            const icon = document.getElementById('sound-icon');
+            if(state.isSoundOn) {
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10.5a1.5 1.5 0 00-1.5 1.5v4a1.5 1.5 0 001.5 1.5h3.25l4.634 3.707A1 1 0 0014 20.354V3.646a1 1 0 00-1.616-.793L8.25 6.5H5z"></path>`;
+            } else {
+                icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><line x1="17" y1="14" x2="23" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line><line x1="17" y1="8" x2="23" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"></line>`;
+            }
+            soundClick();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable full-screen mode: ${err.message}`);
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+            soundClick();
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('#main-content > div').forEach(el => {
+                if(!el.id.startsWith('modal')) el.classList.add('hidden-screen');
+            });
+            document.getElementById(screenId).classList.remove('hidden-screen');
+            window.scrollTo(0, 0);
+        }
+
+        // --- GAME LOGIC ---
+        function initTimer() {
+            if(state.timerInterval) clearInterval(state.timerInterval);
+            state.timerInterval = setInterval(() => {
+                state.timer++;
+                document.getElementById('timer-display').innerText = formatTime(state.timer);
+            }, 1000);
+        }
+
+        function startGame() {
+            soundClick();
+
+            // Kiểm tra nhập tên và lớp
+            const name = document.getElementById('home-input-name').value.trim();
+            const className = document.getElementById('home-input-class').value.trim();
+            
+            if(!name || !className) {
+                document.getElementById('home-error-msg').classList.remove('hidden');
+                document.getElementById('home-error-msg').classList.add('shake');
+                setTimeout(() => document.getElementById('home-error-msg').classList.remove('shake'), 500);
+                return;
+            }
+            
+            document.getElementById('home-error-msg').classList.add('hidden');
+            
+            // Lưu vào state
+            state.studentName = name;
+            state.studentClass = className;
+            
+            // Hiển thị lên Header
+            document.getElementById('header-student-name').innerText = name;
+            document.getElementById('header-student-class').innerText = className;
+
+            document.getElementById('header-bar').style.display = 'flex';
+            if(state.timer === 0) initTimer();
+            renderFileSelection();
+        }
+
+        function showInstructions() {
+            soundClick();
+            showScreen('screen-instructions');
+        }
+
+        function hideInstructions() {
+            soundClick();
+            if(document.getElementById('header-bar').style.display === 'flex') {
+                renderFileSelection();
+            } else {
+                goHome();
+            }
+        }
+
+        function goHome() {
+            soundClick();
+            document.getElementById('header-bar').style.display = 'none';
+            showScreen('screen-home');
+        }
+
+        function resetGame() {
+            soundClick();
+            clearInterval(state.timerInterval);
+            state = {
+                studentName: "", studentClass: "",
+                score: 0, timer: 0, timerInterval: null,
+                unlockedClues: [], fileStatus: [false, false, false, false, false],
+                currentFileIndex: -1, currentQuestionIndex: 0, retryCount: 0, isSoundOn: state.isSoundOn
+            };
+            document.getElementById('timer-display').innerText = "00:00";
+            document.getElementById('home-input-name').value = "";
+            document.getElementById('home-input-class').value = "";
+            updateHeader();
+            goHome();
+        }
+
+        function renderFileSelection() {
+            showScreen('screen-files');
+            updateHeader();
+            const grid = document.getElementById('files-grid');
+            grid.innerHTML = '';
+            
+            gameData.forEach((file, index) => {
+                const isCompleted = state.fileStatus[index];
+                const isLocked = index > 0 && !state.fileStatus[index-1]; // Phải làm theo thứ tự
+
+                let cardClass = "bg-white p-6 rounded-2xl border-2 transition hover:shadow-lg relative ";
+                let buttonHtml = "";
+
+                if(isCompleted) {
+                    cardClass += "border-green-400 opacity-80";
+                    buttonHtml = `<button disabled class="mt-4 w-full bg-green-100 text-green-700 font-bold py-2 rounded-lg border border-green-300">✅ ĐÃ GIẢI QUYẾT</button>`;
+                } else if(isLocked) {
+                    cardClass += "border-gray-200 bg-gray-50 opacity-60 filter grayscale";
+                    buttonHtml = `<button disabled class="mt-4 w-full bg-gray-200 text-gray-500 font-bold py-2 rounded-lg">🔒 BỊ KHÓA</button>`;
+                } else {
+                    cardClass += "border-fuchsia-300 transform hover:-translate-y-1 cursor-pointer btn-3d";
+                    buttonHtml = `<button onclick="openFile(${index})" class="mt-4 w-full bg-fuchsia-500 text-white font-bold py-2 rounded-lg btn-3d">🔍 MỞ HỒ SƠ</button>`;
+                }
+
+                grid.innerHTML += `
+                    <div class="${cardClass}">
+                        ${isCompleted ? '<div class="absolute -top-3 -right-3 text-3xl">✅</div>' : ''}
+                        <div class="text-4xl mb-3">${file.icon}</div>
+                        <h3 class="font-bold text-lg text-fuchsia-900 mb-2">${file.title}</h3>
+                        <p class="text-sm text-gray-600 font-medium">Bao gồm: ${file.questions.length} thử thách</p>
+                        ${buttonHtml}
+                    </div>
+                `;
+            });
+
+            // Hiện nút vào phòng kết luận nếu đủ 5
+            if(state.fileStatus.every(status => status === true)) {
+                document.getElementById('btn-to-conclusion').classList.remove('hidden');
+            } else {
+                document.getElementById('btn-to-conclusion').classList.add('hidden');
+            }
+        }
+
+        function openFile(index) {
+            soundClick();
+            state.currentFileIndex = index;
+            state.currentQuestionIndex = 0;
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            showScreen('screen-question');
+            const file = gameData[state.currentFileIndex];
+            const qData = file.questions[state.currentQuestionIndex];
+
+            // Reset UI
+            document.getElementById('q-feedback').className = "hidden mt-6 p-4 rounded-xl text-center font-bold text-lg border-2";
+            document.getElementById('q-hint').classList.add('hidden');
+            document.getElementById('q-actions').classList.add('hidden');
+            document.getElementById('btn-retry').classList.add('hidden');
+            document.getElementById('btn-next').classList.add('hidden');
+
+            document.getElementById('q-file-title').innerText = `${file.title}`;
+            document.getElementById('q-number-badge').innerText = `Thử thách ${state.currentQuestionIndex + 1}/${file.questions.length}`;
+            document.getElementById('q-text').innerText = qData.q;
+            document.getElementById('hint-text').innerText = qData.hint;
+
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+            
+            qData.options.forEach((opt, idx) => {
+                optionsContainer.innerHTML += `
+                    <button onclick="checkAnswer(${idx}, this)" class="option-btn w-full text-left p-4 rounded-xl border-2 border-pink-200 hover:bg-pink-100 hover:border-pink-400 font-bold text-lg text-gray-700 transition bg-white">
+                        <span class="inline-block w-8 h-8 text-center leading-8 rounded-full bg-pink-100 text-fuchsia-600 mr-2">${String.fromCharCode(65 + idx)}</span>
+                        ${opt}
+                    </button>
+                `;
+            });
+        }
+
+        function checkAnswer(selectedIndex, btnElement) {
+            // Khóa các nút
+            document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+            
+            const file = gameData[state.currentFileIndex];
+            const qData = file.questions[state.currentQuestionIndex];
+            const isCorrect = (selectedIndex === qData.answer);
+            const feedbackEl = document.getElementById('q-feedback');
+            const actionsEl = document.getElementById('q-actions');
+
+            feedbackEl.classList.remove('hidden');
+            actionsEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                soundCorrect();
+                btnElement.classList.remove('border-pink-200', 'bg-white');
+                btnElement.classList.add('border-green-500', 'bg-green-100', 'text-green-800', 'bounce-in');
+                
+                feedbackEl.classList.add('bg-green-100', 'text-green-800', 'border-green-400');
+                feedbackEl.innerHTML = `🎉 CHÍNH XÁC! Bạn nhận được 10 điểm.`;
+                state.score += 10;
+                updateHeader();
+
+                document.getElementById('btn-next').classList.remove('hidden');
+            } else {
+                soundWrong();
+                btnElement.classList.remove('border-pink-200', 'bg-white');
+                btnElement.classList.add('border-red-500', 'bg-red-100', 'text-red-800', 'shake');
+                
+                // Hiển thị đáp án đúng
+                const correctBtn = document.querySelectorAll('.option-btn')[qData.answer];
+                correctBtn.classList.add('border-green-500', 'bg-green-50');
+
+                feedbackEl.classList.add('bg-red-100', 'text-red-800', 'border-red-400');
+                feedbackEl.innerHTML = `❌ Rất tiếc, chưa chính xác! (Không bị trừ điểm)`;
+                state.retryCount++;
+                
+                document.getElementById('q-hint').classList.remove('hidden');
+                document.getElementById('btn-retry').classList.remove('hidden');
+            }
+        }
+
+        function retryQuestion() {
+            soundClick();
+            renderQuestion(); // Render lại câu hỏi hiện tại
+        }
+
+        function nextQuestion() {
+            soundClick();
+            const file = gameData[state.currentFileIndex];
+            
+            if (state.currentQuestionIndex < file.questions.length - 1) {
+                // Sang câu tiếp theo trong hồ sơ
+                state.currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                // Hoàn thành hồ sơ
+                state.fileStatus[state.currentFileIndex] = true;
+                if(!state.unlockedClues.includes(file.clue)) {
+                    state.unlockedClues.push(file.clue);
+                }
+                updateHeader();
+                
+                // Show modal thông báo nhận manh mối
+                alertClueUnlocked(file.title, file.clue);
+            }
+        }
+
+        function alertClueUnlocked(title, clueText) {
+            // Chuyển sang màn hình riêng để không ghi đè màn hình câu hỏi
+            showScreen('screen-clue-unlocked');
+            const container = document.getElementById('screen-clue-unlocked');
+            container.innerHTML = `
+                <div class="text-center bounce-in bg-white p-8 rounded-3xl border-4 border-yellow-400 shadow-xl">
+                    <div class="text-6xl mb-4">🔓✨</div>
+                    <h2 class="text-2xl font-black text-fuchsia-700 mb-2">ĐÃ PHÁ GIẢI HỒ SƠ!</h2>
+                    <p class="font-bold text-gray-500 mb-6">${title}</p>
+                    <div class="bg-yellow-50 p-6 rounded-xl border border-yellow-200 mb-8">
+                        <div class="text-xs uppercase font-bold text-yellow-600 mb-2">Manh mối thu được:</div>
+                        <p class="text-lg font-bold text-gray-800">"${clueText}"</p>
+                    </div>
+                    <button onclick="renderFileSelection()" class="btn-3d bg-fuchsia-500 text-white font-bold text-xl py-3 px-8 rounded-xl w-full">
+                        TIẾP TỤC ĐIỀU TRA ➡️
+                    </button>
+                </div>
+            `;
+        }
+
+        function openEvidenceBoard() {
+            soundClick();
+            const modal = document.getElementById('modal-evidence');
+            const list = document.getElementById('evidence-list');
+            list.innerHTML = '';
+            
+            gameData.forEach((file, idx) => {
+                const isUnlocked = state.unlockedClues.includes(file.clue);
+                if (isUnlocked) {
+                    list.innerHTML += `
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg shadow-sm">
+                            <h4 class="font-bold text-sm text-yellow-800 uppercase mb-1">Manh mối ${idx + 1}</h4>
+                            <p class="font-semibold text-gray-800">${file.clue}</p>
+                        </div>
+                    `;
+                } else {
+                    list.innerHTML += `
+                        <div class="bg-gray-100 border-l-4 border-gray-300 p-4 rounded-r-lg flex items-center justify-center opacity-70">
+                            <p class="font-bold text-gray-400">🔒 Chưa thu thập (Cần giải Hồ sơ ${idx + 1})</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            modal.classList.remove('hidden-screen');
+        }
+
+        function closeEvidenceBoard() {
+            soundClick();
+            document.getElementById('modal-evidence').classList.add('hidden-screen');
+        }
+
+        function enterConclusionRoom() {
+            soundClick();
+            showScreen('screen-conclusion');
+            const list = document.getElementById('final-clues-list');
+            list.innerHTML = '';
+            state.unlockedClues.forEach(clue => {
+                list.innerHTML += `<li>${clue}</li>`;
+            });
+            document.getElementById('final-feedback').classList.add('hidden');
+            document.querySelectorAll('#final-options button').forEach(b => {
+                b.className = "w-full text-left p-4 rounded-xl border-2 border-pink-200 hover:bg-pink-100 font-bold text-lg text-gray-700 transition bg-white";
+                b.disabled = false;
+            });
+        }
+
+        function checkFinalAnswer(isCorrect, btn) {
+            document.querySelectorAll('#final-options button').forEach(b => b.disabled = true);
+            const feedback = document.getElementById('final-feedback');
+            feedback.classList.remove('hidden');
+
+            if(isCorrect) {
+                soundWin();
+                btn.classList.add('border-green-500', 'bg-green-100', 'text-green-800', 'bounce-in');
+                feedback.innerHTML = `
+                    <div class="p-4 bg-green-100 text-green-800 border-2 border-green-400 rounded-xl font-bold text-xl mb-6">
+                        🎉 TUYỆT VỜI! THÁM TỬ ĐÃ TÌM RA CHÂN TƯỚNG!
+                    </div>
+                    <button onclick="showSummary()" class="btn-3d bg-fuchsia-500 text-white font-bold text-xl py-4 px-10 rounded-2xl w-full">
+                        XEM BÁO CÁO TỔNG KẾT 📖
+                    </button>
+                `;
+            } else {
+                soundWrong();
+                btn.classList.add('border-red-500', 'bg-red-100', 'text-red-800', 'shake');
+                feedback.innerHTML = `
+                    <div class="p-4 bg-red-100 text-red-800 border-2 border-red-400 rounded-xl font-bold mb-4">
+                        ❌ Chưa chính xác. Hãy xem kỹ lại các manh mối nhé!
+                    </div>
+                    <button onclick="enterConclusionRoom()" class="btn-gold-3d bg-yellow-400 text-yellow-900 font-bold py-2 px-6 rounded-xl">
+                        🔄 SUY LUẬN LẠI
+                    </button>
+                `;
+            }
+        }
+
+        function showSummary() {
+            soundClick();
+            clearInterval(state.timerInterval); // Dừng thời gian
+            document.getElementById('header-bar').style.display = 'none'; // Ẩn header
+            showScreen('screen-summary');
+
+            // Điền tự động form thông tin đã thu thập từ đầu
+            document.getElementById('student-name').value = state.studentName;
+            document.getElementById('student-class').value = state.studentClass;
+            document.getElementById('btn-submit-score').disabled = false;
+            document.getElementById('btn-submit-score').innerText = "🚀 GỬI KẾT QUẢ LÊN HỆ THỐNG";
+            document.getElementById('submit-message').className = "hidden mt-4 font-bold text-center";
+        }
+
+        async function submitResults() {
+            soundClick();
+            const nameInput = document.getElementById('student-name').value.trim();
+            const classInput = document.getElementById('student-class').value.trim();
+            const msgBox = document.getElementById('submit-message');
+            const btn = document.getElementById('btn-submit-score');
+
+            if(!nameInput || !classInput) {
+                msgBox.className = "mt-4 p-3 rounded-xl bg-red-100 text-red-700 border border-red-300 font-bold text-center";
+                msgBox.innerText = "❌ Vui lòng nhập đầy đủ Họ Tên và Lớp!";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "⏳ Đang gửi dữ liệu...";
+            msgBox.className = "hidden";
+
+            // Tính toán số liệu thống kê
+            const totalQuestions = gameData.reduce((sum, file) => sum + file.questions.length, 0);
+            const correct = state.score / 10; // Mỗi câu đúng 10 điểm
+            const wrong = state.retryCount; // Số câu trả lời sai (thử lại)
+            // Vì phải đúng hết mới qua cửa nên số câu chưa làm = tổng trừ đi số câu đã đúng
+            const unanswered = totalQuestions - correct; 
+
+            const payload = {
+                fullName: nameInput,
+                className: classInput,
+                score: state.score,
+                correctAnswers: correct,
+                wrongAnswers: wrong,
+                unanswered: unanswered > 0 ? unanswered : 0,
+                totalQuestions: totalQuestions,
+                timeString: formatTime(state.timer)
+            };
+
+            // Đã kết nối với hệ thống nhận dữ liệu Google Sheets
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlWhAfcgw-sfFk2fxc7BUoon966SEVq4WbWr5lklbTPoGIJQ8XG3fWsLzZnBma6wRGwQ/exec"; 
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Tránh lỗi chặn tên miền chéo
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                // Vì dùng mode no-cors, trình duyệt sẽ không đọc được response trả về
+                // Giả định nếu code chạy không bị văng lỗi catch thì là đã gửi thành công
+                msgBox.className = "mt-4 p-3 rounded-xl bg-green-100 text-green-800 border border-green-300 font-bold text-center";
+                msgBox.innerText = "✅ Dữ liệu của bạn đã được lưu thành công!";
+                btn.innerText = "ĐÃ GỬI XONG";
+                
+            } catch (error) {
+                msgBox.className = "mt-4 p-3 rounded-xl bg-red-100 text-red-700 border border-red-300 font-bold text-center";
+                msgBox.innerText = "❌ Lỗi kết nối. Không thể lưu dữ liệu.";
+                console.error("Lỗi gửi dữ liệu:", error);
+                btn.disabled = false;
+                btn.innerText = "🚀 THỬ GỬI LẠI";
+            }
+        }
+
+        // Init UI
+        goHome();
+
+    </script>
+</body>
+</html>
